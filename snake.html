@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title></title>
+    <style type="text/css">
+    *{
+        background-color:lightgoldenrodyellow;
+    }
+        .body{
+            width:600px;
+            margin:100px auto;
+            text-align:center;
+           
+        }
+        #main{
+            height:300px;
+            border:1px solid #999;
+            background-color:pink;
+            position:relative;
+        }
+        #main div{
+            width:20px;
+            height:20px;
+            background-image:url(./snake.jpg);
+            background-position: 0 0;
+            background-size:100% 100%;
+            background-repeat: no-repeat;
+            position:absolute;
+            border-radius: 50%;
+        }
+        #main div.snake{
+            background-color:pink;
+            background-image:url(./sugar.jpg);
+            background-position: 0 0;
+            background-size:100% 100%;
+            background-repeat: no-repeat;
+        }
+        .score{
+            font-size:14px;
+        }
+        .score strong{
+            color:deeppink;
+        }
+        #btn{
+            background-color: pink;
+            margin-bottom:5px;
+        }
+    </style>
+
+    <script type="text/javascript">
+        window.onload = function () {
+            var omain = document.getElementById("main");
+            var mainWidth = 30, mainHeight = 15;
+            var asnake = [];
+            var odiv = document.createElement("div");
+            asnake.push({ l: Math.floor(Math.random() * mainWidth), 
+                          t: Math.floor(Math.random() * mainHeight), 
+                          div: odiv, 
+                          d: "r" 
+                        });
+            omain.appendChild(odiv);
+            setPosition(asnake[0]);
+            //设置位置
+            function setPosition(obj) {
+                obj.div.style.left = obj.l * 20 + "px";
+                obj.div.style.top = obj.t * 20 + "px";
+            }
+            var aEat = null;
+            var d = "r";
+            var dd = "r";
+            var a = "r" ;
+            //创建吃的
+            function createEat() {
+                var l = Math.floor(Math.random() * mainWidth);
+                var t = Math.floor(Math.random() * mainHeight);
+                var isexist = false;
+                //判断是否存在在设数组里面
+                for (var i = 0; i < asnake.length; i++) {
+                    if (l == asnake[i].l && t == asnake[i].t) {
+                        createEat();
+                        return;
+                    }
+                }
+                
+                var onewdiv = document.createElement("div");
+                onewdiv.className = "snake";
+                aEat = { l: l, t: t, div: onewdiv, d: "l" };
+                omain.appendChild(onewdiv);
+                setPosition(aEat);
+            }
+            createEat();
+
+            //开始、暂停游戏
+            var obtn = document.getElementById("btn");
+            var oscore = document.getElementById("score");
+ 
+            var otimer = null;
+            var isitem = true;
+            obtn.onclick = function () {
+                if (!isitem) {
+                    clearInterval(otimer);
+                    obtn.value = "继续游戏";
+                    isitem = true;
+                    return false;
+                }
+                obtn.value = "暂停游戏";
+                setasnke();
+                isitem = false;
+            }
+ 
+            function setasnke() {
+                document.onkeydown = function (event) {
+                    var oEn = event || window.event;
+                    var oCode = oEn.keyCode;
+                    switch (oCode) {
+                        case 37:
+                            a = "l";
+                            break;
+                        case 38:
+                            a = "t";
+                            break;
+                        case 39:
+                            a = "r";
+                            break;
+                        case 40:
+                            a = "b";
+                            break;
+                    }
+                    if(a == "l" && dd !== "rr") {
+                    d = "l";
+                    }else if(a == "l" && dd == "rr"){
+                        d = "r";
+                    }
+                    if(a == "r" && dd !== "ll") {
+                        d = "r";
+                    }else if(a == "r" && dd == "ll"){
+                        d = "l";
+                    }
+                    if(a == "t" && dd !== "bb") {
+                        d = "t";
+                    }else if(a == "t" && dd == "bb") {
+                        d = "b";
+                    }
+                    if(a == "b" && dd !== "tt") {
+                        d = "b";
+                    }else if(a == "b" && dd == "tt") {
+                        d = "t";
+                    }
+                }
+                
+
+
+                otimer = setInterval(function () {
+                    for (var i = asnake.length - 1; i > 0; i--) {
+                        asnake[i].l = asnake[i - 1].l;
+                        asnake[i].r = asnake[i - 1].r;
+                        asnake[i].t = asnake[i - 1].t;
+                        asnake[i].d = asnake[i - 1].d;
+                    }
+                    
+                    switch (d) {
+                        case "l": 
+                            asnake[0].l--;
+                            dd = "ll";
+                            break;
+                        case "r":
+                            asnake[0].l++;
+                            dd = "rr";
+                            break;
+                        case "t":
+                            asnake[0].t--;
+                            dd = "tt";
+                            break;
+                        case "b":
+                            asnake[0].t++;
+                            dd = "bb";
+                            break;
+                    }
+                    
+                    //判断蛇是否撞墙了
+                    if (asnake[0].l < 0 || asnake[0].l >= mainWidth || asnake[0].t < 0 || asnake[0].t >= mainHeight) {
+                        alert("撞到墙了 游戏结束");
+                        clearInterval(otimer);
+                        return;
+                    }
+                    //判断蛇是否撞到自己了
+                    for (var n = 1; n < asnake.length; n++) {
+                        if (asnake[0].l === asnake[n].l && asnake[0].t === asnake[n].t) {
+                            alert("撞到自己了吧 游戏结束");
+                            clearInterval(otimer);
+                            return;
+                        }
+                    }
+                    
+                    //判断蛇是否吃到糖了
+                    if (asnake[0].l == aEat.l && asnake[0].t == aEat.t) {
+                        aEat.div.className = "";
+                        oscore.innerHTML = parseInt(oscore.innerHTML) + 1;
+                        asnake.push(aEat);
+                        createEat();
+                    }
+                    //重新设置蛇的位置
+                    for (var j = 0; j < asnake.length; j++) {
+                        setPosition(asnake[j]);
+                    }
+                }, 200);
+            }   
+        }
+    </script>
+</head>
+<body>
+    <div class="body">
+        <input type="button" id="btn" value="开始游戏" />&nbsp;&nbsp;<span class="score">吃到糖果数量：<strong id="score">0</strong></span>
+        <div id="main">
+        </div>
+    </div>
+</body>
+</html>
